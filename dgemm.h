@@ -3,7 +3,7 @@
 
 #define min(a,b) ((a < b))?(a):(b)
 
-// adding this to test lazygit command
+// adding this to test lazygit
 static inline void naive_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C) 
 { 
   for (int k = 0; k < lda; ++k) {
