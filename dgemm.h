@@ -51,19 +51,28 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
 	/*------------------NEED TO REWORK BUFFERING-----------------*/
 	/*-----------------------------------------------------------*/
 
-  vector<double> AA = calloc((ldmax + maxbuffer), sizeof(zeroref));
-  vector<double> BB = calloc((ldmax + maxbuffer), sizeof(zeroref));
-  vector<double> CC = calloc((ldmax + maxbuffer), sizeof(zeroref));
+  vector<double> AA = malloc((ldmax + maxbuffer) * sizeof(zeroref));
+  vector<double> BB = malloc((ldmax + maxbuffer) * sizeof(zeroref));
+  vector<double> CC = malloc((ldmax + maxbuffer) * sizeof(zeroref));
   
   int counter = 0;
   int i = 0;
-  for (; i < ldmax+maxbuffer;) {
-    AA[i] = A
+  for (; i < lda;) {
+    AA[i] = A[i];
   }
+  int i = 0;
+  for (; i < ldb;) {
+    BB[i] = B[i];
+  }
+  int i = 0;
+  for (; i < ldc;) {
+    CC[i] = C[i];
+  }
+
   
   /*------------------old method for padding below-------------*/
 
-  if(lda != ldb && lda != ldc) {
+  /*if(lda != ldb && lda != ldc) {
     int counter = 0;
     int i = 0;
     if (abuffer != 0 || lda < ldmax) {
@@ -108,7 +117,7 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
 	}
       }
     }
-  }
+  } */
 
 	printf("test 2\n");
 
