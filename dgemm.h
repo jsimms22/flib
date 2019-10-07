@@ -1,6 +1,8 @@
 #ifndef DGEMM
 #define DGEMM
 
+#include <vector>
+
 #define min(a,b) ((a < b))?(a):(b)
 #define max(a,b) ((a > b))?(a):(b)
 
@@ -48,6 +50,18 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
 	/*-----------------------------------------------------------*/
 	/*------------------NEED TO REWORK BUFFERING-----------------*/
 	/*-----------------------------------------------------------*/
+
+  vector<double> AA = calloc((ldmax + maxbuffer), sizeof(zeroref));
+  vector<double> BB = calloc((ldmax + maxbuffer), sizeof(zeroref));
+  vector<double> CC = calloc((ldmax + maxbuffer), sizeof(zeroref));
+  
+  int counter = 0;
+  int i = 0;
+  for (; i < ldmax+maxbuffer;) {
+    AA[i] = A
+  }
+  
+  /*------------------old method for padding below-------------*/
 
   if(lda != ldb && lda != ldc) {
     int counter = 0;
@@ -98,7 +112,7 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
 
 	printf("test 2\n");
 
-  for (int x = 0; x < ldmax; x += BLOCK2) {
+  /*for (int x = 0; x < ldmax; x += BLOCK2) {
     int lim_i = x + min(BLOCK2,ldmax - x);
     for (int y = 0; y < ldmax; y += BLOCK2) {
       int lim_j = y + min(BLOCK2,ldmax - y);
@@ -116,7 +130,7 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
         }
       }
     }
-  }
+  }*/
 }
 
 #endif
