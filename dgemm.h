@@ -6,7 +6,10 @@
 #define min(a,b) ((a < b))?(a):(b)
 #define max(a,b) ((a > b))?(a):(b)
 
-// adding this to test lazygit
+static inline void  2d_unroll(double** m, vector<double> v) {
+  for(
+}
+
 static inline void naive_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C) 
 { 
   for (int k = 0; k < lda; ++k) {
@@ -20,37 +23,46 @@ static inline void naive_dgemm(int lda, int M, int N, int K, double* A, double* 
   }
 }
 
+// adding this to test lazygit
+static inline void naive_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C) { }
+
 // Used for solving matmul C = C + A*B
 // linear dimensional value will be n*m, where n and m are the 2-dim values
 
-static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, double* C)
+  /* for square: roll out, do method as built previously
+   * for non-square: break into squares of largest possible size
+   *                 roll out, do method as built previously
+   * for fringe cases: we can either solve traditionally, or pad out fringe cases
+   */
+
+// lda = m*n, ldb = n*p, ldc = m*k
+//
+//
+//    m*n        n*k        m*k
+// |1 1 1 1|    |2 2|      |3 3|
+// |1 1 1 1| *  |2 2|  =   |3 3|
+// |1 1 1 1|    |2 2|      |3 3| 
+//              |2 2|       
+static inline void matmul(int m, int n, int k, double** A, double** B, double** C)
 {
-  int BLOCK1 = 4;//256;
-  int BLOCK2 = 8;//512;
-  double zeroref = 0.0;
+  register int BLOCK1 = 4; register int BLOCK2 = 8;
+  register double zeroref = 0.0;
 
-  int ldmax = max(lda,ldb);
-  ldmax = max(ldb,ldc);
-  ldmax = max(lda,ldc);
+
+  int ldmax = max(m,n); ldmax = max(n,k); ldmax = max(m,k);
   
-  int abuffer = lda%4;
-  int bbuffer = ldb%4;
-  int cbuffer = ldc%4;
+  int mbuffer = m%4; 
+  int nbuffer = n%4; 
+  int kbuffer = k%4;
     
-  int maxbuffer = max(abuffer,bbuffer);
-  maxbuffer = max(bbuffer,cbuffer);
-  maxbuffer = max(abuffer,cbuffer);
-  
-  double buffA[ldmax + maxbuffer];
-  double buffB[ldmax + maxbuffer];
-  double buffC[ldmax + maxbuffer];
-
-	printf("test 1\n");
+  int maxbuffer = max(mbuffer,nbuffer); 
+  maxbuffer = max(nbuffer,kbuffer);
+  maxbuffer = max(mbuffer,kbuffer);
 
 	/*-----------------------------------------------------------*/
 	/*------------------NEED TO REWORK BUFFERING-----------------*/
 	/*-----------------------------------------------------------*/
-
+  
   vector<double> AA = malloc((ldmax + maxbuffer) * sizeof(zeroref));
   vector<double> BB = malloc((ldmax + maxbuffer) * sizeof(zeroref));
   vector<double> CC = malloc((ldmax + maxbuffer) * sizeof(zeroref));
@@ -69,59 +81,7 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
     CC[i] = C[i];
   }
 
-  
-  /*------------------old method for padding below-------------*/
-
-  /*if(lda != ldb && lda != ldc) {
-    int counter = 0;
-    int i = 0;
-    if (abuffer != 0 || lda < ldmax) {
-      for(; counter < ldmax;)
-      {
-	buffA[i] = *(A + counter);
-	i++; counter++;
-	if (ldmax%i != 0) {
-	  for (int j = 0; j < abuffer; j++) { 	
-	    buffA[i] = zeroref; // this may be slow, not contiguous memory
-	    i++;
-	  }
-	}
-      }
-    }
-    if (bbuffer != 0 || ldb < ldmax) {
-      i = 0;
-      for(; counter < ldmax;)
-      {
-	buffB[i] = *(B + counter);
-	i++; counter++;
-	if (ldmax%i != 0) {
-	  for (int j = 0; j < bbuffer; j++) { 	
-	    buffB[i] = zeroref; // this may be slow, not contiguous memory
-	    i++;
-	  }
-	}
-      }
-    }
-
-    if (cbuffer != 0 || ldc < ldmax) {
-      i = 0;
-      for(; counter < ldmax;)
-      {
-	buffB[i] = *(B + counter);
-	i++; counter++;
-	if (ldmax%i != 0) {
-	  for (int j = 0; j < bbuffer; j++) { 	
-	    buffB[i] = zeroref; // this may be slow, not contiguous memory
-	    i++;
-	  }
-	}
-      }
-    }
-  } */
-
-	printf("test 2\n");
-
-  /*for (int x = 0; x < ldmax; x += BLOCK2) {
+  for (int x = 0; x < ldmax; x += BLOCK2) {
     int lim_i = x + min(BLOCK2,ldmax - x);
     for (int y = 0; y < ldmax; y += BLOCK2) {
       int lim_j = y + min(BLOCK2,ldmax - y);
@@ -139,7 +99,7 @@ static inline void matmul(int lda, int ldb, int ldc, double* A, double* B, doubl
         }
       }
     }
-  }*/
+  }
 }
 
 #endif

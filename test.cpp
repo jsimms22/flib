@@ -1,34 +1,23 @@
 #include <iostream>
-#include "dgemm.h"
+//#include "dgemm.h"
+#include "build3.h"
 
 using namespace std;
 
-main() {
-	/*double matrix[5] = {0, 1, 2, 3, 4};
-	double* A;
-	A = &matrix[0];
-	//double x = 10;
+const int m = 3;
+const int n = 4;
+const int k = 2;
 
-	//A = &x;
+int main() {
+  double** A;
+  double** B;
+  double** C;
 
-	cout << "*A = " << *A << "\n";
-	cout << "A = " << A << "\n";
+  A = Build1(m,n,A);
+  B = Build1(n,k,B);
+  C = Build1(m,k,C);
 
-	cout << "*A + 1 = " << *(A+1) << "\n";
-	cout << "A + 1 = " << (A + 1) << "\n";*/
+  Print3(m,n,k,A,B,C);
 
-	double A[6] = {1, 1, 1, 1, 1, 1};
-	double B[9] = {1, 1, 1, 1, 1, 1, 1, 1, 1};
-	double C[6] = {0, 0, 0, 0, 0, 0};
-
-	matmul(6,9,6,&A[0],&B[0],&C[0]);
-
-	for (int i = 0; i < 16; ++i) {
-		//for (int j = 1; j <= ; ++j) {
-			cout << " " << C[i] << " ";
-		//}	
-		//cout << "\n";
-	}
-
-	return 0;
+  delete A,B,C;
 }
