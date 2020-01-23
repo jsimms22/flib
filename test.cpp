@@ -1,5 +1,4 @@
 #include <iostream>
-#include <cmath>
 #include "dgemm.h"
 
 using namespace std;
@@ -18,7 +17,7 @@ int main() {
 
   A = Build1(m,n,A);
   B = Build1(n,k,B);
-  C = Build1(m,k,C); //this is simply to keep using Print3()
+  C = Build1(m,k,C); //this is simply to keep using Print3() atm
 
   Print3(m,n,k,A,B,C);
 
@@ -53,7 +52,6 @@ int main() {
   double* CC = (double*)calloc((ldmax*ldmax),sizeof(double));
   cout << "C unrolled:\n";
   for(int i = 0; i < ldmax*ldmax; i++) {cout << CC[i] << " ";} cout << "\n\n";
-
 
   matmul(ldmax,m,n,k,AA,BB,CC);
   
