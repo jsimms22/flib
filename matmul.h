@@ -265,7 +265,7 @@ static inline void row_naive_dgemm(int lda, int M, int N, int K, double* A, doub
 //
 static inline void matmul(int ldmax, int m, int n, int k, double* AA, double* BB, double* CC)
 {
-  register int BLOCK1 = 128; register int BLOCK2 = 256;
+  register int BLOCK1 = 4; register int BLOCK2 = 8;
   
   /*int mbuffer = m % 4;
   mbuffer = (4 - mbuffer);

@@ -1,0 +1,15 @@
+dgemm.h
+-avx column dgemm is working correctly
+-need to get row working
+-get ALPHA/BETA variable working
+-get zero matrix cases working
+-work on transposed cases
+
+test.cpp
+-convert test to c
+-install intel's MKL
+-get the reference function working
+-set over a wide range of matrix dimensions
+
+build3.h
+-rework to print only one matrix
