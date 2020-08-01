@@ -94,10 +94,10 @@ static void do_avx256 (int lda, int M, int N, int K, double* a, double* b, doubl
     for (int j = 0; j < N; ++j) {
       m0 = _mm256_setzero_pd();  
       for (int k = 0; k < K; ++k) {
-	m1 = _mm256_load_pd(a+i+k*lda);
-	m2 = _mm256_broadcast_sd(b+k+j*lda);
-	m3 = _mm256_mul_pd(m1,m2);
-	m0 = _mm256_add_pd(m0,m3);
+	      m1 = _mm256_load_pd(a+i+k*lda);
+	      m2 = _mm256_broadcast_sd(b+k+j*lda);
+	      m3 = _mm256_mul_pd(m1,m2);
+	      m0 = _mm256_add_pd(m0,m3);
       }
       m1 = _mm256_load_pd(c+i+j*lda);
       m0 = _mm256_add_pd(m0,m1);

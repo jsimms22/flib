@@ -4,9 +4,11 @@
 
 #include <float.h>
 #include <math.h>
+#include "build3.h"
 
 //#include <lapack.h>
-//#include "lapacke.h"
+//#include "lapack.h"
+#include "cblas.h"
 
 #include "matmul.h"
 
@@ -16,7 +18,7 @@
 #include <time.h>
 #endif
 
-//using namespace std;
+using namespace std;
 
 #define min(a,b) ((a < b))?(a):(b)
 #define max(a,b) ((a > b))?(a):(b)
@@ -25,8 +27,8 @@ const int m = 3;//3
 const int n = 4;//4
 const int k = 2;//2
 
-//#define DGEMM dgemm
-extern "C" void dgemm_(char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
+/*#define DGEMM dgemm_
+extern "C" void dgemm_ (char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
 
 void reference_dgemm(int N, double ALPHA, double* A, double* B, double* C) {
   char TRANSA = 'N';
@@ -37,10 +39,11 @@ void reference_dgemm(int N, double ALPHA, double* A, double* B, double* C) {
   int LDA = N;
   int LDB = N;
   int LDC = N;
-  dgemm_(&TRANSA, &TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
-}
+  
+  dgemm_ (&TRANSA, &TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+}*/
 
-extern const char* dgemm_desc;
+//extern const char* dgemm_desc;
 extern void matmul(int, int, int, int, double*, double*, double*);
 
 int main() {
@@ -57,7 +60,7 @@ int main() {
   print_2d_array(m,k,C);
 
   int ldmax = 0;
-  ldmax_calc(ldmax,m,A,n,B,k,C);
+  ldmax_calc(m,n,k);
 
   //cout << "Unrolled versions of the arrays\n\n";
   double* AA = convert1(m,n,ldmax,A,true);
@@ -86,16 +89,16 @@ int main() {
 
   cout << "matmul function time = " << endTime - beginTime << "\n";
 
-  CC = (double*)calloc((ldmax*ldmax),sizeof(double));
+  //CC = (double*)calloc((ldmax*ldmax),sizeof(double));
 
-  beginTime = clock();
-  reference_dgemm(n, -3.0*DBL_EPSILON*ldmax, AA, BB, CC);
-  endTime = clock();
+  //beginTime = clock();
+  //reference_dgemm(n, -3.0*DBL_EPSILON*ldmax, AA, BB, CC);
+  //endTime = clock();
   
-  cout << "reference function time = " << endTime - beginTime << "\n";
+  //cout << "reference function time = " << endTime - beginTime << "\n";
 
-  //cout << "C solution from function matmul:\n";
-  //for(int i = 0; i < ldmax*ldmax; i++) {cout << CC[i] << " ";} cout << "\n\n";
+  cout << "C solution from function matmul:\n";
+  for(int i = 0; i < ldmax*ldmax; i++) {cout << CC[i] << " ";} cout << "\n\n";
   
   delete [] A,B,C,AA,BB,CC;
 }

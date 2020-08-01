@@ -30,8 +30,6 @@ void Array_Printer(int row, int column, double* array, bool major) {
   printf("\n");
 }
 
-
-/*
 //--------- Simple function to print a 2d array ------------//
 void print_2d_array(int row, int column, double** array) {
   int i, j;
@@ -44,7 +42,7 @@ void print_2d_array(int row, int column, double** array) {
   }
   printf("\n");
 }
-*/
+
 
 double* Array_Builder(double ALPHA, int row, int column) {
   int i;int j;
@@ -78,8 +76,8 @@ double** build1(double ALPHA, int row, int column, double** array) {
   }
 
   return array;
-}
-*/
+}*/
+
 
 double* Array_Buffer(int row, int column, int ldmax, double* array, bool major) {
   int i; int j;
@@ -113,7 +111,7 @@ double* Array_Buffer(int row, int column, int ldmax, double* array, bool major) 
 //    *bool major determines if the 2d array will be 
 //     unrolled column or row major
 //    -> column = true/1
-//    -> row = false/0
+//    -> row = false
 double* convert1(int row, int column, int ldmax, double** array, bool major) {
 
   int i; int j;
