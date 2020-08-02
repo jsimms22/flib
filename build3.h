@@ -17,16 +17,16 @@
 #define min(a,b) ((a < b))?(a):(b)
 #define max(a,b) ((a > b))?(a):(b)
 
-void Array_Printer(int row, int column, double* array, bool major) {
+void Array_Printer(int row, int column, double* array) {
   int i; int j;
-
-  for(i = 0; i < row; i++) {
-    for(j = 0; j < column; j++) {
-      if(major == 1) { printf("%g ", array[i*row + j]); }
-      if(major == 0) { printf("%g ", array[j*row + i]); }
+  
+    for(i = 0; i < row; i++) {
+      for(j = 0; j < column; j++) {
+        printf("%g ", array[i*column + j]);
+      }
+      printf("\n");
     }
-    printf("\n");
-  }
+
   printf("\n");
 }
 
@@ -79,29 +79,15 @@ double** build1(double ALPHA, int row, int column, double** array) {
 }*/
 
 
-double* Array_Buffer(int row, int column, int ldmax, double* array, bool major) {
+double* Array_Buffer(int row, int column, int ldmax, double* array) {
   int i; int j;
   double* buffArray = (double*)calloc((ldmax*ldmax),sizeof(double));
 
-  if(major == 1) { //true means row major
-    for(i = 0; i < ldmax; i++) {
-      for(j = 0; j < ldmax; j++) {
-        if(i < row && j < column) {
-          buffArray[i*ldmax + j] = array[i*row + j];
-        }
+    for(i = 0; i < row; i++) {
+      for(j = 0; j < column; j++) {
+          buffArray[i*ldmax + j] = array[i*column + j];
       }
     }
-  }
-
-  if(major == 0) { //false means column major
-    for(i = 0; i < ldmax; i++) {
-      for(j = 0; j < ldmax; j++) {
-        if(j < row && i < column) {
-          buffArray[ldmax*i + j] = array[j*row + i];
-        }
-      }
-    }
-  }
 
   return buffArray;
 }

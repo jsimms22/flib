@@ -266,22 +266,25 @@ static inline void row_naive_dgemm(int lda, int M, int N, int K, double* A, doub
 static inline void matmul(int ldmax, int m, int n, int k, double* AA, double* BB, double* CC)
 {
   register int BLOCK1 = 4; register int BLOCK2 = 8;
-  
-  /*int mbuffer = m % 4;
-  mbuffer = (4 - mbuffer);
-  int nbuffer = n % 4;
-  nbuffer = (4 - nbuffer);
-  int kbuffer = k % 4;
-  kbuffer = (4 - kbuffer);
 
-  int maxbuffer = max(mbuffer,nbuffer);
-  maxbuffer = max(maxbuffer,kbuffer);
-
-  int ldmax = max(m+mbuffer,n+nbuffer); 
-  ldmax = max(ldmax,k+kbuffer);*/
-  
+  //Below is used to test row major array for accurate math to ensure transpose does not
+  //fuck things up
   //row_naive_dgemm(ldmax,k,n,m,AA,BB,CC);
+  
+  //Below is used to test the validity of avx/blocked math for DGEMM operations
   //column_naive_dgemm(ldmax,k,n,m,AA,BB,CC);
+
+  if(TRANSA = 1) {
+    //Transpose A matrix here
+  }
+
+  if(TRANSB = 1) {
+    //Transpose B matrix here
+  }
+
+  if(TRANSC = 1) {
+    //Transpose C matrix here
+  }
 
   for (int x = 0; x < ldmax; x += BLOCK2) {
     int lim_i = x + min(BLOCK2,ldmax - x);
@@ -301,6 +304,18 @@ static inline void matmul(int ldmax, int m, int n, int k, double* AA, double* BB
         }
       }
     }
+  }
+
+  if(TRANSA = 1) {
+    //Transpose A matrix here
+  }
+
+  if(TRANSB = 1) {
+    //Transpose B matrix here
+  }
+
+  if(TRANSC = 1) {
+    //Transpose C matrix here
   }
 }
 

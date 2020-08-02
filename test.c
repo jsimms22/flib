@@ -45,34 +45,40 @@ int main() {
  
   A = Array_Builder(1.0,m,n);
   B = Array_Builder(1.0,n,k);
-  //C = Array_Builder(1.0,m,k);
+  
+  /* below is used to validate the unrolled 2D array 
+   * is printing to look like a 2D array correctly
+  for(int i = 0; i < m*n; i++) {
+    printf("%g ", A[i]);
+  }
+  printf("\n");
+  printf("\n");
+  */
 
-  Array_Printer(m,n,A,0);
-  Array_Printer(n,k,B,0);
-  //Array_Printer(m,k,C,0);
+  Array_Printer(m,n,A/*,1*/);
+  
+  /* below is used to validate the unrolled 2D array 
+   * is printing to look like a 2D array correctly
+  for(int i = 0; i < n*k; i++) {
+    printf("%g ", B[i]);
+  }
+  printf("\n");
+  printf("\n");
+  */
+
+  Array_Printer(n,k,B/*,1*/);
 
   int ldmax;
   ldmax = ldmax_calc(m,n,k);
 
-  //cout << "Unrolled versions of the arrays\n\n";
-  double* AA = Array_Buffer(m,n,ldmax,A,0);
-  Array_Printer(ldmax,ldmax,AA,0);
-  //cout << "A unrolled:\n";
-  //for(int i = 0; i < ldmax*ldmax; i++) {cout << AA[i] << " ";} cout << "\n\n";
+  double* AA = Array_Buffer(m,n,ldmax,A/*,1*/);
+  Array_Printer(ldmax,ldmax,AA/*,1*/);
   
-  double* BB = Array_Buffer(n,k,ldmax,B,0);
-  Array_Printer(ldmax,ldmax,BB,0);
-  //cout<< "B unrolled:\n";
-  //for(int i = 0; i < ldmax*ldmax; i++) {cout << BB[i] << " ";} cout << "\n\n";
+  double* BB = Array_Buffer(n,k,ldmax,B/*,1*/);
+  Array_Printer(ldmax,ldmax,BB/*,1*/);
 
   double* CC = (double*)calloc((ldmax*ldmax),sizeof(double));
-  Array_Printer(ldmax,ldmax,CC,0);
-  //cout << "C unrolled:\n";
-  //for(int i = 0; i < ldmax*ldmax; i++) {cout << CC[i] << " ";} cout << "\n\n";
-
-  //A = trans_mat(m,n,A);
-
-  //print_2d_array(m,n,A);
+  Array_Printer(ldmax,ldmax,CC/*,1*/);
   
   clock_t beginTime, endTime;
 
@@ -91,7 +97,7 @@ int main() {
   //printf("reference function time = %ld\n", endTime - beginTime);
 
   printf("C Solution from Function matmul: \n");
-  Array_Printer(ldmax,ldmax,CC,0);
+  Array_Printer(ldmax,ldmax,CC/*,1*/);
 
   //cout << "C solution from function matmul:\n";
   //for(int i = 0; i < ldmax*ldmax; i++) {cout << CC[i] << " ";} cout << "\n\n";
