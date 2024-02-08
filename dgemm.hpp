@@ -1,18 +1,16 @@
 #ifndef DGEMM
 #define DGEMM
 
-#include "build3.h"
-#include <mmintrin.h>
-#include <immintrin.h>
-#include <xmmintrin.h>
-#include <pmmintrin.h>
-#include <emmintrin.h>
-#include <string.h>
+#include "build3.hpp"
+#include<mmintrin.h>
+#include<immintrin.h>
+#include<xmmintrin.h>
+#include<pmmintrin.h>
+#include<emmintrin.h>
+#include<string.h>
+#include<algorithm>
 
 const char* dgemm_desc = "AVX and Blocked DGEMM Function.";
-
-#define min(a,b) ((a < b))?(a):(b)
-#define max(a,b) ((a > b))?(a):(b)
 
 #define turn_even(x) (((x) & 1) ? (x+1) : (x))
 
@@ -106,7 +104,7 @@ static void do_avx256 (int lda, int M, int N, int K, double* a, double* b, doubl
   }
 }
 
-static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C)
+static void inline blocked_column_dgemm(int lda, int M, int N, const int K, double* A, double* B, double* C)
 {
   double A_block[M*K], B_block[K*N];
   double *a_ptr, *b_ptr, *c;
@@ -284,17 +282,17 @@ static inline void matmul(int ldmax, int m, int n, int k, double* AA, double* BB
   //column_naive_dgemm(ldmax,k,n,m,AA,BB,CC);
 
   for (int x = 0; x < ldmax; x += BLOCK2) {
-    int lim_i = x + min(BLOCK2,ldmax - x);
+    int lim_i = x + std::min(BLOCK2,ldmax - x);
     for (int y = 0; y < ldmax; y += BLOCK2) {
-      int lim_j = y + min(BLOCK2,ldmax - y);
+      int lim_j = y + std::min(BLOCK2,ldmax - y);
       for (int z = 0; z < ldmax; z += BLOCK2) {
-        int lim_k = z + min(BLOCK2,ldmax - z);
+        int lim_k = z + std::min(BLOCK2,ldmax - z);
         for (int i = x; i < lim_i; i += BLOCK1) {
-          int M = min(BLOCK1,lim_i - i);
+          int M = std::min(BLOCK1,lim_i - i);
           for (int j = y; j < lim_j; j += BLOCK1) {
-            int N = min(BLOCK1,lim_j - j);
+            int N = std::min(BLOCK1,lim_j - j);
             for (int k = z; k < lim_k; k += BLOCK1) {
-              int K = min(BLOCK1,lim_k - k);
+              int K = std::min(BLOCK1,lim_k - k);
               blocked_column_dgemm(ldmax,M,N,K,&AA[i + k*ldmax],&BB[k + j*ldmax],&CC[i + j*ldmax]);
             }
           }
