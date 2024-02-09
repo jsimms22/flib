@@ -1,17 +1,17 @@
-#include "matmul.h"
+#include "matmul.hpp"
 
-#ifdef GETTIMEOFDAY
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
+// #ifdef GETTIMEOFDAY
+// #include <sys/time.h>
+// #else
+// #include <time.h>
+// #endif
 
 // #define min(a,b) ((a < b))?(a):(b)
 // #define max(a,b) ((a > b))?(a):(b)
 
-const int m = 3;//3
-const int n = 4;//4
-const int k = 2;//2
+constexpr int m = 2;//3
+constexpr int n = 2;//4
+constexpr int k = 2;//2
 
 /*#define DGEMM dgemm_
 extern "C" void dgemm_ (char*, char*, int*, int*, int*, double*, double*, int*, double*, int*, double*, double*, int*);
@@ -32,7 +32,9 @@ void reference_dgemm(int N, double ALPHA, double* A, double* B, double* C) {
 int main() {
     std::array<double,m*n> A = array_builder<double,m*n>(1.0);
     std::array<double,n*k> B = array_builder<double,n*k>(1.0);
-    std::array<double,m*k> C = array_builder<double,m*k>(1.0);
+    std::array<double,m*k> C;// = array_builder<double,m*k>(1.0);
+
+    for (int i = 0; i < C.size(); i++) { C[i] = 0; }
 
     array_printer(m,n,A);
     array_printer(n,k,B);
@@ -57,15 +59,15 @@ int main() {
 
     //print_2d_array(m,n,A);
     
-    clock_t beginTime, endTime;
+    //clock_t beginTime, endTime;
     
-    matmul(ldmax,m,n,k,A,B,C);
+    matmul<double,m*n,n*k,m*k>(2,m,n,k,A,B,C);
 
-    beginTime = clock();
-    matmul(ldmax,m,n,k,A,B,C);
-    endTime = clock();
+    // beginTime = clock();
+    // matmul(ldmax,m,n,k,A,B,C);
+    // endTime = clock();
 
-    std::cout << "matmul function time = " << endTime - beginTime << "\n";
+    // std::cout << "matmul function time = " << endTime - beginTime << "\n";
 
     //CC = (double*)calloc((ldmax*ldmax),sizeof(double));
 
@@ -76,10 +78,8 @@ int main() {
     //cout << "reference function time = " << endTime - beginTime << "\n";
 
     std::cout << "C solution from function matmul:\n";
-    for (int i = 0; i < ldmax*ldmax; i++) {
+    for (int i = 0; i < m*k; i++) {
         std::cout << C[i] << " ";
     } 
     std::cout << "\n\n";
-    
-    //delete [] A,B,C,AA,BB,CC;
 }

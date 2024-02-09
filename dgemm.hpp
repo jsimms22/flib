@@ -104,7 +104,7 @@ static void do_avx256 (int lda, int M, int N, int K, double* a, double* b, doubl
   }
 }
 
-static void inline blocked_column_dgemm(int lda, int M, int N, const int K, double* A, double* B, double* C)
+static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C)
 {
   double A_block[M*K], B_block[K*N];
   double *a_ptr, *b_ptr, *c;
