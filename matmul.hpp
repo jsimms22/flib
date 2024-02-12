@@ -1,23 +1,27 @@
 #ifndef DGEMM
 #define DGEMM
 
-#include "build3.h"
-#include <mmintrin.h>
-#include <immintrin.h>
-#include <xmmintrin.h>
-#include <pmmintrin.h>
-#include <emmintrin.h>
-#include <string.h>
+#include "build3.hpp"
+#include<mmintrin.h>  //MMX
+#include<xmmintrin.h> //SSE
+#include<emmintrin.h> //SSE2
+#include<pmmintrin.h> //SSE3
+#include<tmmintrin.h> //SSSE3
+#include<smmintrin.h> //SSE4.1
+#include<nmmintrin.h> //SSE4.2
+#include<ammintrin.h> //SSE4A
+#include<wmmintrin.h> //AES
+#include<immintrin.h> //AVX, AVX2, FMA
 
 const char* dgemm_desc = "AVX and Blocked DGEMM Function.";
 
-#define min(a,b) ((a < b))?(a):(b)
-#define max(a,b) ((a > b))?(a):(b)
+// #define min(a,b) ((a < b))?(a):(b)
+// #define max(a,b) ((a > b))?(a):(b)
 
-#define turn_even(x) (((x) & 1) ? (x+1) : (x))
+// #define turn_even(x) (((x) & 1) ? (x+1) : (x))
 
-#define likely(x)       __builtin_expect((x),1)
-#define unlikely(x)     __builtin_expect((x),0)
+// #define likely(x)       __builtin_expect((x),1)
+// #define unlikely(x)     __builtin_expect((x),0)
 
 #define ARRAY(A,i,j) (A)[(j)*lda + (i)]
 
@@ -28,10 +32,10 @@ const char* dgemm_desc = "AVX and Blocked DGEMM Function.";
  * | 03 13 23 33 |  | 3x -> |  |             |
  */
 static void do_4x4 (int lda, int K, double* a, double* b, double* c) {
-  register __m256d a0x_3x,
-    bx0, bx1, bx2, bx3,
-    c00_30, c01_31,
-    c02_32, c03_33;
+  __m256d a0x_3x,
+                   bx0, bx1, bx2, bx3,
+                   c00_30, c01_31,
+                   c02_32, c03_33;
   
   double* c01_31_ptr = c + lda;
   double* c02_32_ptr = c01_31_ptr + lda;
@@ -106,31 +110,11 @@ static void do_avx256 (int lda, int M, int N, int K, double* a, double* b, doubl
   }
 }
 
-static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C)
+template <class T, std::size_t MK, std::size_t KN, std::size_t MN>
+void blocked_column_dgemm(int lda, int M, int N, int K, std::array<T,MK>& A, std::array<T,KN>& B, std::array<T,MN>& C)
 {
-  double A_block[M*K], B_block[K*N];
-  double *a_ptr, *b_ptr, *c;
-
-/*
- * 8x8 blocks: slower than 4x4 blocks
- */
-  /*int Nmax = N-7;
-  int Mmax = M-7;
-  int fringe1 = M%8;
-  int fringe2 = N%8;
-  
-  int i = 0, j = 0, p = 0;
-    
-  for (j = 0; j < Nmax; j += 8) {
-    b_ptr = &B_block[j*K];
-    copy_b8 (lda, K, B + j*lda, b_ptr);
-    for (i = 0; i < Mmax; i += 8) {
-      a_ptr = &A_block[i*K];
-      if (j == 0) copy_a8 (lda, K, A + i, a_ptr);
-      c = C + i + j*lda;
-      do_8x8 (lda, K, a_ptr, b_ptr, c);
-    }
-  }*/
+  T A_block[MK], B_block[KN];
+  T *a_ptr, *b_ptr, *c;
 
  /* 4x4 blocks */
   int Nmax = N-3;
@@ -138,38 +122,18 @@ static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A,
   int fringe1 = M%4;
   int fringe2 = N%4;
 
-  register int i = 0, j = 0, p = 0;
+  int i = 0, j = 0, p = 0;
 
-  for (j = 0 ; j < Nmax; j += 4) 
-  {
+  for (j = 0 ; j < Nmax; j += 4) {
     b_ptr = &B_block[j*K];
     copy_b4(lda, K, B + j*lda, b_ptr);
     for (i = 0; i < Mmax; i += 4) {
       a_ptr = &A_block[i*K];
-      if (j == 0) copy_a4(lda, K, A + i, a_ptr);
+      if (j == 0) { copy_a4(lda, K, A + i, a_ptr); }
       c = C + i + j*lda;
       do_4x4(lda, K, a_ptr, b_ptr, c);
     }
   }
-
- /* 2x2 blocks */
-  /*int Nmax = N-1;
-  int Mmax = M-1;
-  int fringe1 = M%2;
-  int fringe2 = N%2;
-  
-  int i = 0, j = 0, p = 0;
-  
-  for (j = 0; j < Nmax; j += 2) {
-    b_ptr = &B_block[j*K];
-    copy_b2 (lda, K, B + j*lda, b_ptr);
-    for (i = 0; i < Mmax; i += 2) {
-      a_ptr = &A_block[i*K];
-      if (j == 0) copy_a2 (lda, K, A + i, a_ptr);
-      c = C + i + j*lda;
-      do_2x2 (lda, K, a_ptr, b_ptr, c);
-    }
-  }*/
 
   /* Handle "fringes" */
   if (fringe1 != 0) {
@@ -178,7 +142,7 @@ static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A,
       /* For each column of B */ 
       for (p = 0; p < N; ++p) {
         /* Compute C[i,j] */
-        register double c_ip = ARRAY(C,i,p);
+        double c_ip = ARRAY(C,i,p);
         for (int k = 0; k < K; ++k)
           c_ip += ARRAY(A,i,k) * ARRAY(B,k,p);
         ARRAY(C,i,p) = c_ip;
@@ -192,7 +156,7 @@ static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A,
       /* For each row of A */ 
       for (i = 0; i < Mmax; ++i) {
         /* Compute C[i,j] */
-        register double cij = ARRAY(C,i,j);
+        double cij = ARRAY(C,i,j);
         for (int k = 0; k < K; ++k)
           cij += ARRAY(A,i,k) * ARRAY(B,k,j);
         ARRAY(C,i,j) = cij;
@@ -200,13 +164,14 @@ static void inline blocked_column_dgemm(int lda, int M, int N, int K, double* A,
   }
 }
 
-static inline void blocked_column_naive_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C) {
+template <class T, std::size_t MK, std::size_t KN, std::size_t MN>
+void blocked_column_naive_dgemm(int lda, int M, int N, int K, std::array<T,MK>& A, std::array<T,KN>& B, std::array<T,MN>& C) {
   // For each row of A
   for (int i = 0; i < M; ++i) {
     // For each column of B
     for (int j = 0; j < N; ++j) {
       // Compute C[i,j] 
-      register double cij = 0.0;
+      double cij = 0.0;
       for (int k = 0; k < K; ++k){
         cij += A[i+k*lda] * B[k+j*lda];
       }
@@ -215,7 +180,8 @@ static inline void blocked_column_naive_dgemm(int lda, int M, int N, int K, doub
   }
 }
 
-static inline void column_naive_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C) 
+template <class T, std::size_t MK, std::size_t KN, std::size_t MN>
+void column_naive_dgemm(int lda, int M, int N, int K, std::array<T,MK>& A, std::array<T,KN>& B, std::array<T,MN>& C) 
 { 
   for (int i = 0; i < lda; i++) {
     /* For each column j of B */
@@ -231,7 +197,8 @@ static inline void column_naive_dgemm(int lda, int M, int N, int K, double* A, d
 }
 
 //Below solves for row major DGEMM
-static inline void row_naive_dgemm(int lda, int M, int N, int K, double* A, double* B, double* C) 
+template <class T, std::size_t MK, std::size_t KN, std::size_t MN>
+void row_naive_dgemm(int lda, int M, int N, int K, std::array<T,MK>& A, std::array<T,KN>& B, std::array<T,MN>& C) 
 { 
   for (int i = 0; i < lda; i++) {
     /* For each column j of B */
@@ -263,59 +230,34 @@ static inline void row_naive_dgemm(int lda, int M, int N, int K, double* A, doub
 // |1 1 1 1|    |2 2|      |3 3| 
 //              |2 2|       
 //
-static inline void matmul(int ldmax, int m, int n, int k, double* AA, double* BB, double* CC)
+template <class T, std::size_t MN, std::size_t NK, std::size_t MK>
+void matmul(int ldmax, int m, int n, int k, std::array<T,MN>& A, std::array<T,NK>& B, std::array<T,MK>& C)
 {
-  register int BLOCK1 = 4; register int BLOCK2 = 8;
+  int BLOCK1 = 4; int BLOCK2 = 8;
 
-  //Below is used to test row major array for accurate math to ensure transpose does not
-  //fuck things up
-  //row_naive_dgemm(ldmax,k,n,m,AA,BB,CC);
-  
-  //Below is used to test the validity of avx/blocked math for DGEMM operations
+  row_naive_dgemm(ldmax,k,n,m,A,B,C);
   //column_naive_dgemm(ldmax,k,n,m,AA,BB,CC);
 
-  if(TRANSA = 1) {
-    //Transpose A matrix here
-  }
-
-  if(TRANSB = 1) {
-    //Transpose B matrix here
-  }
-
-  if(TRANSC = 1) {
-    //Transpose C matrix here
-  }
-
   for (int x = 0; x < ldmax; x += BLOCK2) {
-    int lim_i = x + min(BLOCK2,ldmax - x);
+    int lim_i = x + std::min(BLOCK2,ldmax - x);
     for (int y = 0; y < ldmax; y += BLOCK2) {
-      int lim_j = y + min(BLOCK2,ldmax - y);
+      int lim_j = y + std::min(BLOCK2,ldmax - y);
       for (int z = 0; z < ldmax; z += BLOCK2) {
-        int lim_k = z + min(BLOCK2,ldmax - z);
+        int lim_k = z + std::min(BLOCK2,ldmax - z);
         for (int i = x; i < lim_i; i += BLOCK1) {
-          int M = min(BLOCK1,lim_i - i);
+          int M = std::min(BLOCK1,lim_i - i);
           for (int j = y; j < lim_j; j += BLOCK1) {
-            int N = min(BLOCK1,lim_j - j);
+            int N = std::min(BLOCK1,lim_j - j);
             for (int k = z; k < lim_k; k += BLOCK1) {
-              int K = min(BLOCK1,lim_k - k);
-              blocked_column_dgemm(ldmax,M,N,K,&AA[i + k*ldmax],&BB[k + j*ldmax],&CC[i + j*ldmax]);
+              int K = std::min(BLOCK1,lim_k - k);
+              //blocked_column_dgemm(ldmax,M,N,K,A[i + k*ldmax],B[k + j*ldmax],C[i + j*ldmax]);
+              //blocked_row_dgemm(ldmax,M,N,K,A[k + i*ldmax],B[j + k*ldmax],C[j + i*ldmax]);
+
             }
           }
         }
       }
     }
-  }
-
-  if(TRANSA = 1) {
-    //Transpose A matrix here
-  }
-
-  if(TRANSB = 1) {
-    //Transpose B matrix here
-  }
-
-  if(TRANSC = 1) {
-    //Transpose C matrix here
   }
 }
 
