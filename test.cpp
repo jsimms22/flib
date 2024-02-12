@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 #include <iostream>
 #include <stdio.h>
 #include <string>
@@ -25,6 +26,22 @@ constexpr int m = 3;//3
 constexpr int n = 4;//4
 =======
 #include "matmul.hpp"
+=======
+#include "matmul.hpp"
+
+// #ifdef GETTIMEOFDAY
+// #include <sys/time.h>
+// #else
+// #include <time.h>
+// #endif
+
+// #define min(a,b) ((a < b))?(a):(b)
+// #define max(a,b) ((a > b))?(a):(b)
+
+constexpr int m = 2;//3
+constexpr int n = 2;//4
+constexpr int k = 2;//2
+>>>>>>> c69f96e9352230d12ef85551ef652be7159fac11
 
 // #ifdef GETTIMEOFDAY
 // #include <sys/time.h>
@@ -54,7 +71,11 @@ void reference_dgemm(int N, double ALPHA, double* A, double* B, double* C) {
   int LDC = N;
   
   dgemm_ (&TRANSA, &TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+<<<<<<< HEAD
 }
+=======
+}*/
+>>>>>>> c69f96e9352230d12ef85551ef652be7159fac11
 
 int main() {
     std::array<double,m*n> A = array_builder<double,m*n>(1.0);
