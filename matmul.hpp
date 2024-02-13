@@ -1,7 +1,7 @@
 #ifndef DGEMM
 #define DGEMM
 
-#include "build3.hpp"
+#include "matrix.hpp"
 #include<mmintrin.h>  //MMX
 #include<xmmintrin.h> //SSE
 #include<emmintrin.h> //SSE2
