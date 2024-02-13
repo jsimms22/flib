@@ -21,7 +21,7 @@ namespace matrix
     //     return dis;
     // }
 
-    template <typename T, std::size_t Rows, std::size_t Cols>
+    template <class T, std::size_t Rows, std::size_t Cols>
     using Matrix = std::array<T, Rows*Cols>;
 
     template <class T, std::size_t Rows, std::size_t Cols>
