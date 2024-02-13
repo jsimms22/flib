@@ -1,9 +1,9 @@
 # flib
 
 ##ROAD MAP TO DO LIST:
-- [] Need to fix the array_printer for row
-- [] Need to fix the array_builder for row
-- [] Verify that matmul.h is working correctly 
+- [x] Need to fix the array_printer for row
+- [x] Need to fix the array_builder for row
+- [x] Verify that matmul.h is working correctly 
 - [] Remove buffered slots to return answer in original format
 - [] Get dgemm to work - currently returns an issue of reference_dgemm() does not recognize the existance of cblas_dgemm()
 - [] Parallelize the code to work with OMP
