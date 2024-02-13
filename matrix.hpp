@@ -25,7 +25,7 @@ namespace matrix
     using Matrix = std::array<T, Rows*Cols>;
 
     template <class T, std::size_t Rows, std::size_t Cols>
-    void print_matrix(Matrix<T,Rows,Cols> matrix) 
+    void print_matrix(const Matrix<T,Rows,Cols>& matrix) 
     {
         std::cout << "Printing unrolled matrix[" << Rows << "][" << Cols << "]" << std::endl;
         for(std::size_t i = 0; i < Rows; i++) {
@@ -45,6 +45,7 @@ namespace matrix
         }
     }
 
+    /* IGNORE BUFFERING MATRICES FOR NOW */
     template <class T, std::size_t Rows, std::size_t Cols, std::size_t Ldmax>
     std::array<T,Ldmax*Ldmax> create_pad_matrix(Matrix<T,Rows,Cols>& matrix) 
     {

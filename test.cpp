@@ -1,13 +1,31 @@
+/*
+    OUTPUT:
+        C matrix solution from function naive_row_matmul:
+        Time taken by function: 441200 microseconds
+        C solution from function avx256_row_matmul:
+        Time taken by function: 225400 microseconds
+
+    Where,
+
+    constexpr int m = 70;
+    constexpr int n = 90;
+    constexpr int k = 40;
+
+    Solving matrix-matrix multiple: 
+    C[m][k] = C[m][k] + A[m][n] * B[n][k]
+*/
+
 // #include <lapack.h>
 // #include "lapack.h"
 #include "matmul.hpp"
+#include <chrono>
 
 template <typename T, std::size_t Rows, std::size_t Cols>
 using Matrix = matrix::Matrix<T,Rows,Cols>;
 
-constexpr int m = 5;//3
-constexpr int n = 7;//4
-constexpr int k = 6;//2
+constexpr int m = 70;
+constexpr int n = 90;
+constexpr int k = 40;
 
 // Needed to find leading dimensional value at compile time
 // Only useful for padding the arrays
@@ -33,14 +51,14 @@ int main() {
     Matrix<double,m,k> C;
     matrix::fill_matrix<double,m,k>(0.0,C);
 
-    matrix::print_matrix<double,m,n>(A);
-    std::cout << std::endl;
+    // matrix::print_matrix<double,m,n>(A);
+    // std::cout << std::endl;
 
-    matrix::print_matrix<double,n,k>(B);
-    std::cout << std::endl;
+    // matrix::print_matrix<double,n,k>(B);
+    // std::cout << std::endl;
 
-    matrix::print_matrix<double,m,k>(C);
-    std::cout << std::endl;
+    // matrix::print_matrix<double,m,k>(C);
+    // std::cout << std::endl;
 
     /* IGNORE BUFFERING MATRICES FOR NOW */
     // Matrix<double,ldmax,ldmax> C_buf = matrix::create_pad_matrix<double,m,k,ldmax>(C);
@@ -48,8 +66,23 @@ int main() {
 
     // std::cout << "ldmax = " << ldmax << std::endl;
     
-    //row_naive_dgemm<double,m*n,n*k,m*k>(ldmax,m,n,k,A,B,C);
-    do_avx256<double,m*n,n*k,m*k>(ldmax,m,n,k,A,B,C);
-    std::cout << "C solution from function matmul:" << std::endl;
-    matrix::print_matrix<double,m,k>(C);
+    auto startTime = std::chrono::high_resolution_clock::now();
+    naive_row_matmul(m,n,k,A,B,C);
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = endTime - startTime;
+
+    std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    // matrix::print_matrix<double,m,k>(C);
+
+    matrix::fill_matrix<double,m,k>(0.0,C);
+
+    startTime = std::chrono::high_resolution_clock::now();
+    avx256_row_matmul(m,n,k,A,B,C);
+    endTime = std::chrono::high_resolution_clock::now();
+    duration = endTime - startTime;
+
+    std::cout << "C solution from function avx256_row_matmul:" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    // matrix::print_matrix<double,m,k>(C);
 }
