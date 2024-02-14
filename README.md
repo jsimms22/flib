@@ -21,6 +21,30 @@
 - [] using mdspan vs std::array vs std::vector. Planning to just finish it using std::array as the container, but might convert to mdspan at some point
     > std::array or std::vector to c-style array is trivial, reverse path requires an extra step
 
+
 ##REFERENCES
 - https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html
 - https://netlib.org/lapack/explore-html/dd/d09/group__gemm_ga1e899f8453bcbfde78e91a86a2dab984.html#ga1e899f8453bcbfde78e91a86a2dab984
+
+
+##SAMPLE OUTPUT
+Beginning <double> std::array tests
+
+C matrix solution from function naive_row_matmul:
+Time taken by function: 1977700 microseconds
+C solution from function avx256_row_matmul:
+Time taken by function: 828900 microseconds
+
+Beginning <double> heap std::array pointer tests
+
+C matrix solution from function naive_row_matmul:
+Time taken by function: 2324700 microseconds
+C solution from function avx256_row_matmul:
+Time taken by function: 992200 microseconds
+
+Beginning <float> std::array tests
+
+C matrix solution from function naive_row_matmul:
+Time taken by function: 2887500 microseconds
+C solution from function avx256_row_matmul:
+Time taken by function: 557000 microseconds
