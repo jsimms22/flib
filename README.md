@@ -1,6 +1,7 @@
 # flib
 
-##ROAD MAP TO DO LIST:
+## ROAD MAP TO DO LIST:
+
 - [x] Need to fix the array_printer for row
 - [x] Need to fix the array_builder for row
 - [x] Verify that matmul.h is working correctly 
@@ -17,17 +18,20 @@
 - [] evaluate performance on cluster against BLAS/LAPACK
 
 
-##THINGS TO CONSIDER:
+## THINGS TO CONSIDER:
+
 - [] using mdspan vs std::array vs std::vector. Planning to just finish it using std::array as the container, but might convert to mdspan at some point
     > std::array or std::vector to c-style array is trivial, reverse path requires an extra step
 
 
-##REFERENCES
+## REFERENCES
+
 - https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html
 - https://netlib.org/lapack/explore-html/dd/d09/group__gemm_ga1e899f8453bcbfde78e91a86a2dab984.html#ga1e899f8453bcbfde78e91a86a2dab984
 
 
-##SAMPLE OUTPUT
+## SAMPLE OUTPUT
+
 Beginning <double> std::array tests
 
 C matrix solution from function naive_row_matmul:
