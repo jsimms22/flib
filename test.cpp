@@ -90,7 +90,7 @@ int main() {
     auto duration = endTime - startTime;
 
     std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << std::endl;
     // matrix::print_matrix<double,m,k>(C);
 
     matrix::fill_matrix<double,m,k>(0.0,C);
@@ -101,7 +101,7 @@ int main() {
     duration = endTime - startTime;
 
     std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << std::endl;
     // matrix::print_matrix<double,m,k>(C);
 
     /*-------------------------------------------------------*/
@@ -134,7 +134,7 @@ int main() {
     duration = endTime - startTime;
 
     std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << std::endl;
     // matrix::print_matrix<double,m,k>(*(C_ptr));
 
     matrix::fill_matrix<double,m,k>(0.0,*(C_ptr));
@@ -145,7 +145,7 @@ int main() {
     duration = endTime - startTime;
 
     std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << std::endl;
     // matrix::print_matrix<double,m,k>(*(C_ptr));
 
     /*-------------------------------------------------------*/
@@ -175,7 +175,7 @@ int main() {
     duration = endTime - startTime;
 
     std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << std::endl;
     // matrix::print_matrix<double,m,k>(C);
 
     matrix::fill_matrix<float,m,k>(0.0,C_flt);
@@ -186,6 +186,6 @@ int main() {
     duration = endTime - startTime;
 
     std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << " microseconds" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << std::endl;
     // matrix::print_matrix<double,m,k>(C);
 }

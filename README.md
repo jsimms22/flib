@@ -36,27 +36,28 @@ Beginning <double> std::array tests
 
 C matrix solution from function naive_row_matmul:
 
-Time taken by function: 1977700 microseconds
+Time taken by function: 1977700
 
 C solution from function avx256_row_matmul:
 
-Time taken by function: 828900 microseconds
+Time taken by function: 828900
 
 Beginning <double> heap std::array pointer tests
 
 C matrix solution from function naive_row_matmul:
 
-Time taken by function: 2324700 microseconds
+Time taken by function: 2324700
 
 C solution from function avx256_row_matmul:
 
-Time taken by function: 992200 microseconds
+Time taken by function: 992200
 
 Beginning <float> std::array tests
 
 C matrix solution from function naive_row_matmul:
-Time taken by function: 2887500 microseconds
+
+Time taken by function: 2887500
 
 C solution from function avx256_row_matmul:
 
-Time taken by function: 557000 microseconds
+Time taken by function: 557000
