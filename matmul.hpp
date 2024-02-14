@@ -13,7 +13,6 @@
 #include<immintrin.h> //AVX, AVX2, FMA
 
 // Double precision AVX256 row DGEMM
-// Used for solving matmul C = C + A*B
 template <std::size_t MN, std::size_t NK, std::size_t MK>
 void avx256_row_matmul(int M, int N, int K, std::array<double,MN>& A, std::array<double,NK>& B, std::array<double,MK>& C) 
 {
@@ -31,7 +30,6 @@ void avx256_row_matmul(int M, int N, int K, std::array<double,MN>& A, std::array
 }
 
 // Single precision AVX256 row FGEMM
-// Used for solving matmul C = C + A*B
 template <std::size_t MN, std::size_t NK, std::size_t MK>
 void avx256_row_matmul(int M, int N, int K, std::array<float,MN>& A, std::array<float,NK>& B, std::array<float,MK>& C) 
 {
@@ -44,6 +42,27 @@ void avx256_row_matmul(int M, int N, int K, std::array<float,MN>& A, std::array<
                 result = _mm256_add_ps(result, _mm256_mul_ps(a, b));
             }
             _mm256_storeu_ps(&C[j+i*K], result);
+        }
+    }
+}
+
+// Integer AVX256 row IGEMM
+template <std::size_t MN, std::size_t NK, std::size_t MK>
+void avx256_row_matmul(int M, int N, int K, std::array<int,MN>& A, std::array<int,NK>& B, std::array<int,MK>& C) 
+{
+    for (int i = 0; i < M; ++i) {
+        for (int j = 0; j < K; ++j) {
+            __m256i result = _mm256_setzero_si256();
+            // __m256i result = _mm256_loadu_si256((__m256i*)&C[j+i*K]);
+            for (int k = 0; k < N; k+=8) {
+                __m256i a = _mm256_loadu_si256((__m256i*)&A[k+i*N]);
+                __m256i b = _mm256_loadu_si256((__m256i*)&B[j+k*K]);
+                result = _mm256_add_epi32(result, _mm256_mullo_epi32(a, b));
+                // sum = _mm256_add_epi32(_mm256_loadu_si256((__m256i*)&C[j+i*K]), result);
+            }
+            _mm256_storeu_si256((__m256i*)&C[j+i*K], result);
+            //C[j+i*K] = _mm256_add_epi32(_mm256_loadu_si256((__m256i*)&C[j+i*K]), result);
+            //_mm256_storeu_si256((__m256i*)&C[j+i*K], _mm256_add_epi32(_mm256_loadu_si256((__m256i*)&C[j+i*K]), result));
         }
     }
 }
