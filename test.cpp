@@ -1,34 +1,3 @@
-/*
-    std::array OUTPUT:
-
-        C matrix solution from function naive_row_matmul:
-        Time taken by function: 441200 microseconds
-        C solution from function avx256_row_matmul:
-        Time taken by function: 225400 microseconds
-
-    Where,
-
-    constexpr int m = 70;
-    constexpr int n = 90;
-    constexpr int k = 40;
-
-    std::unique_ptr OUTPUT:
-
-        C matrix solution from function naive_row_matmul:
-        Time taken by function: 1949797400 microseconds
-        C solution from function avx256_row_matmul:
-        Time taken by function: 878351600 microseconds
-
-    Where,
-
-    constexpr int m = 700;
-    constexpr int n = 900;
-    constexpr int k = 400;
-
-    Solving matrix-matrix multiple: 
-    C[m][k] = C[m][k] + A[m][n] * B[n][k]
-*/
-
 // #include <lapack.h>
 // #include "lapack.h"
 #include "matmul.hpp"
