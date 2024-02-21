@@ -12,6 +12,73 @@
 #include<wmmintrin.h> //AES
 #include<immintrin.h> //AVX, AVX2, FMA
 
+ /*C Matrix 4x4     A Matrix   B Matrix
+ * | 00 10 20 30 |  | 0x -> |  | 0x 1x 2x 3x |
+ * | 01 11 21 31 |  | 1x -> |  |             |
+ * | 02 12 22 32 |  | 2x -> |  |             |
+ * | 03 13 23 33 |  | 3x -> |  |             |
+ */
+void do_4x4(int lda, int M, double* a, double* b, double* c) {
+    register __m256d a0x_3x,
+        bx0, bx1, bx2, bx3,
+        c00_30, c01_31,
+        c02_32, c03_33;
+  
+    double* c01_31_ptr = c + lda;
+    double* c02_32_ptr = c01_31_ptr + lda;
+    double* c03_33_ptr = c02_32_ptr + lda;
+    
+    c00_30 = _mm256_loadu_pd(c);
+    c01_31 = _mm256_loadu_pd(c01_31_ptr);
+    c02_32 = _mm256_loadu_pd(c02_32_ptr);
+    c03_33 = _mm256_loadu_pd(c03_33_ptr);
+    
+    for (int x = 0; x < M; ++x) {
+        a0x_3x = _mm256_loadu_pd(a);
+        a += 4;
+
+        bx0 = _mm256_broadcast_sd(b++);
+        bx1 = _mm256_broadcast_sd(b++);
+        bx2 = _mm256_broadcast_sd(b++);
+        bx3 = _mm256_broadcast_sd(b++);
+
+        c00_30 = _mm256_add_pd(c00_30, _mm256_mul_pd(a0x_3x,bx0));
+        c01_31 = _mm256_add_pd(c01_31, _mm256_mul_pd(a0x_3x,bx1));
+        c02_32 = _mm256_add_pd(c02_32, _mm256_mul_pd(a0x_3x,bx2));
+        c03_33 = _mm256_add_pd(c03_33, _mm256_mul_pd(a0x_3x,bx3));
+    }
+    
+    _mm256_storeu_pd(c,c00_30);
+    _mm256_storeu_pd(c01_31_ptr,c01_31);
+    _mm256_storeu_pd(c02_32_ptr,c02_32);
+    _mm256_storeu_pd(c03_33_ptr,c03_33);
+}
+
+void copy_a4 (int lda, const int M, std::array<double,16>& a_src, std::array<double,16>& a_dest) {
+    for (int i = 0; i < M; i+=lda) {
+        a_dest[i] = a_src[i];
+        a_dest[i+1] = a_src[i+1];
+        a_dest[i+2] = a_src[i+2];
+        a_dest[i+3] = a_src[i+3];
+        //a_src += lda;
+    }
+}
+
+void copy_b4 (int lda, const int K, std::array<double,16>& b_src, std::array<double,16>& b_dest) {
+    double *b_ptr0, *b_ptr1, *b_ptr2, *b_ptr3;
+    b_ptr0 = b_src;
+    b_ptr1 = b_ptr0 + lda;
+    b_ptr2 = b_ptr1 + lda;
+    b_ptr3 = b_ptr2 + lda;
+
+    for (int i = 0; i < K; ++i) {
+        b_dest++ = b_ptr0++;
+        b_dest++ = b_ptr1++;
+        b_dest++ = b_ptr2++;
+        b_dest++ = b_ptr3++;
+    }
+}
+
 // Double precision AVX256 row DGEMM
 template <std::size_t MN, std::size_t NK, std::size_t MK>
 void avx256_row_matmul(int M, int N, int K, std::array<double,MN>& A, std::array<double,NK>& B, std::array<double,MK>& C) 
@@ -29,7 +96,7 @@ void avx256_row_matmul(int M, int N, int K, std::array<double,MN>& A, std::array
     }
 }
 
-// Single precision AVX256 row FGEMM
+// floating point AVX256 row FGEMM
 template <std::size_t MN, std::size_t NK, std::size_t MK>
 void avx256_row_matmul(int M, int N, int K, std::array<float,MN>& A, std::array<float,NK>& B, std::array<float,MK>& C) 
 {
@@ -100,31 +167,30 @@ void naive_row_matmul(int M, int N, int K, std::array<T,MN>& A, std::array<T,NK>
 // |1 1 1 1| *  |2 2|  =   |3 3|
 // |1 1 1 1|    |2 2|      |3 3| 
 //              |2 2|       
-//
-// template <class T, std::size_t MN, std::size_t NK, std::size_t MK>
-// void matmul(int ldmax, int m, int n, int k, std::array<T,MN>& A, std::array<T,NK>& B, std::array<T,MK>& C)
-// {
-//     int BLOCK1 = 4; int BLOCK2 = 8;
+template <class T, std::size_t MN, std::size_t NK, std::size_t MK>
+void matmul(int ldmax, int m, int n, int k, std::array<T,MN>& A, std::array<T,NK>& B, std::array<T,MK>& C)
+{
+    int BLOCK1 = 8; int BLOCK2 = 16;
 
-//     row_naive_dgemm(ldmax,k,n,m,A,B,C);
+    // row_naive_dgemm(ldmax,k,n,m,A,B,C);
 
-//     for (int x = 0; x < ldmax; x += BLOCK2) {
-//         int lim_i = x + std::min(BLOCK2,ldmax - x);
-//         for (int y = 0; y < ldmax; y += BLOCK2) {
-//             int lim_j = y + std::min(BLOCK2,ldmax - y);
-//             for (int z = 0; z < ldmax; z += BLOCK2) {
-//                 int lim_k = z + std::min(BLOCK2,ldmax - z);
-//                 for (int i = x; i < lim_i; i += BLOCK1) {
-//                     int M = std::min(BLOCK1,lim_i - i);
-//                     for (int j = y; j < lim_j; j += BLOCK1) {
-//                         int N = std::min(BLOCK1,lim_j - j);
-//                         for (int k = z; k < lim_k; k += BLOCK1) {
-//                             int K = std::min(BLOCK1,lim_k - k);
-//                             //blocked_row_dgemm(ldmax,M,N,K,A[k + i*ldmax],B[j + k*ldmax],C[j + i*ldmax]);
-//                         }
-//                     }
-//                 }
-//             }
-//         }
-//     }
-// }
+    for (int x = 0; x < ldmax; x += BLOCK2) {
+        int lim_i = x + std::min(BLOCK2,ldmax - x);
+        for (int y = 0; y < ldmax; y += BLOCK2) {
+            int lim_j = y + std::min(BLOCK2,ldmax - y);
+            for (int z = 0; z < ldmax; z += BLOCK2) {
+                int lim_k = z + std::min(BLOCK2,ldmax - z);
+                for (int i = x; i < lim_i; i += BLOCK1) {
+                    int M = std::min(BLOCK1,lim_i - i);
+                    for (int j = y; j < lim_j; j += BLOCK1) {
+                        int N = std::min(BLOCK1,lim_j - j);
+                        for (int k = z; k < lim_k; k += BLOCK1) {
+                            int K = std::min(BLOCK1,lim_k - k);
+                            //blocked_row_dgemm(ldmax,M,N,K,A[k + i*ldmax],B[j + k*ldmax],C[j + i*ldmax]);
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
