@@ -7,9 +7,9 @@
 template <typename T, std::size_t Rows, std::size_t Cols>
 using Matrix = matrix::Matrix<T,Rows,Cols>;
 
-constexpr int m = 32;//4;
-constexpr int n = 34;//5;
-constexpr int k = 33;//3;
+constexpr int m = 4*256;//4;
+constexpr int n = 8*256;//5;
+constexpr int k = 3*256;//3;
 
 // Needed to find leading dimensional value at compile time
 // Only useful for padding the arrays
@@ -36,42 +36,42 @@ int main() {
     /*------------(double) std::array tests------------------*/
     /*-------------------------------------------------------*/
 
-    Matrix<double,m,n> A; 
-    matrix::fill_matrix<double,m,n>(1.0,A);
-    // matrix::print_matrix<double,m,n>(A);
-    // std::cout << std::endl;
+    // Matrix<double,m,n> A; 
+    // matrix::fill_matrix<double,m,n>(1.0,A);
+    // // matrix::print_matrix<double,m,n>(A);
+    // // std::cout << std::endl;
 
-    Matrix<double,n,k> B;
-    matrix::fill_matrix<double,n,k>(1.0,B);
-    // matrix::print_matrix<double,n,k>(B);
-    // std::cout << std::endl;
+    // Matrix<double,n,k> B;
+    // matrix::fill_matrix<double,n,k>(1.0,B);
+    // // matrix::print_matrix<double,n,k>(B);
+    // // std::cout << std::endl;
 
-    Matrix<double,m,k> C;
-    matrix::fill_matrix<double,m,k>(0.0,C);
-    // matrix::print_matrix<double,m,k>(C);
-    // std::cout << std::endl;
+    // Matrix<double,m,k> C;
+    // matrix::fill_matrix<double,m,k>(0.0,C);
+    // // matrix::print_matrix<double,m,k>(C);
+    // // std::cout << std::endl;
 
-    std::cout << "\nBeginning stack allocated std::array tests\n" << std::endl;
+    // std::cout << "\nBeginning stack allocated std::array tests\n" << std::endl;
     
-    auto startTime = std::chrono::high_resolution_clock::now();
-    naive_row_matmul<double>(m,n,k,A,B,C);
-    auto endTime = std::chrono::high_resolution_clock::now();
-    auto duration = endTime - startTime;
+    // auto startTime = std::chrono::high_resolution_clock::now();
+    // naive_row_matmul<double>(m,n,k,A,B,C);
+    // auto endTime = std::chrono::high_resolution_clock::now();
+    // auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << std::endl;
-    // matrix::print_matrix<double,m,k>(C);
+    // std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
+    // std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
+    // // matrix::print_matrix<double,m,k>(C);
 
-    matrix::fill_matrix<double,m,k>(0.0,C);
+    // matrix::fill_matrix<double,m,k>(0.0,C);
 
-    startTime = std::chrono::high_resolution_clock::now();
-    avx256_row_matmul(m,n,k,A,B,C);
-    endTime = std::chrono::high_resolution_clock::now();
-    duration = endTime - startTime;
+    // startTime = std::chrono::high_resolution_clock::now();
+    // avx256_row_matmul(m,n,k,A,B,C);
+    // endTime = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << std::endl;
-    // matrix::print_matrix<double,m,k>(C);
+    // std::cout << "C solution from function avx256_row_matmul:" << std::endl;
+    // std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
+    // // matrix::print_matrix<double,m,k>(C);
 
     /*-------------------------------------------------------*/
     /*-----------(double) array pointer tests----------------*/
@@ -97,13 +97,13 @@ int main() {
 
     std::cout << "\nBeginning heap std::array pointer tests\n" << std::endl;
 
-    startTime = std::chrono::high_resolution_clock::now();
+    auto startTime = std::chrono::high_resolution_clock::now();
     naive_row_matmul<double>(m,n,k,*(A_ptr),*(B_ptr),*(C_ptr));
-    endTime = std::chrono::high_resolution_clock::now();
-    duration = endTime - startTime;
+    auto endTime = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
     std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
     // matrix::print_matrix<double,m,k>(*(C_ptr));
 
     matrix::fill_matrix<double,m,k>(0.0,*(C_ptr));
@@ -111,55 +111,55 @@ int main() {
     startTime = std::chrono::high_resolution_clock::now();
     avx256_row_matmul(m,n,k,*(A_ptr),*(B_ptr),*(C_ptr));
     endTime = std::chrono::high_resolution_clock::now();
-    duration = endTime - startTime;
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
     std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
     // matrix::print_matrix<double,m,k>(*(C_ptr));
 
     /*-------------------------------------------------------*/
     /*------------(float) std::array tests-------------------*/
     /*-------------------------------------------------------*/
 
-    Matrix<float,m,n> A_flt; 
-    matrix::fill_matrix<float,m,n>(1.0,A_flt);
-    // matrix::print_matrix<double,m,n>(A);
-    // std::cout << std::endl;
+    // Matrix<float,m,n> A_flt; 
+    // matrix::fill_matrix<float,m,n>(1.0,A_flt);
+    // // matrix::print_matrix<float,m,n>(A_flt);
+    // // std::cout << std::endl;
 
-    Matrix<float,n,k> B_flt;
-    matrix::fill_matrix<float,n,k>(1.0,B_flt);
-    // matrix::print_matrix<double,n,k>(B);
-    // std::cout << std::endl;
+    // Matrix<float,n,k> B_flt;
+    // matrix::fill_matrix<float,n,k>(1.0,B_flt);
+    // // matrix::print_matrix<float,n,k>(B_flt);
+    // // std::cout << std::endl;
 
-    Matrix<float,m,k> C_flt;
-    matrix::fill_matrix<float,m,k>(0.0,C_flt);
-    // matrix::print_matrix<double,m,k>(C);
-    // std::cout << std::endl;
+    // Matrix<float,m,k> C_flt;
+    // matrix::fill_matrix<float,m,k>(0.0,C_flt);
+    // // matrix::print_matrix<float,m,k>(C_flt);
+    // // std::cout << std::endl;
 
-    std::cout << "\nBeginning <float> std::array tests\n" << std::endl;
+    // std::cout << "\nBeginning <float> std::array tests\n" << std::endl;
     
-    startTime = std::chrono::high_resolution_clock::now();
-    naive_row_matmul<float>(m,n,k,A_flt,B_flt,C_flt);
-    endTime = std::chrono::high_resolution_clock::now();
-    duration = endTime - startTime;
+    // startTime = std::chrono::high_resolution_clock::now();
+    // naive_row_matmul<float>(m,n,k,A_flt,B_flt,C_flt);
+    // endTime = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << std::endl;
-    // matrix::print_matrix<double,m,k>(C);
+    // std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
+    // std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
+    // // matrix::print_matrix<float,m,k>(C_flt);
 
-    matrix::fill_matrix<float,m,k>(0.0,C_flt);
+    // matrix::fill_matrix<float,m,k>(0.0,C_flt);
 
-    startTime = std::chrono::high_resolution_clock::now();
-    avx256_row_matmul(m,n,k,A_flt,B_flt,C_flt);
-    endTime = std::chrono::high_resolution_clock::now();
-    duration = endTime - startTime;
+    // startTime = std::chrono::high_resolution_clock::now();
+    // avx256_row_matmul(m,n,k,A_flt,B_flt,C_flt);
+    // endTime = std::chrono::high_resolution_clock::now();
+    // duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
-    std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    std::cout << "Time taken by function: " << duration.count() << std::endl;
-    // matrix::print_matrix<double,m,k>(C);
+    // std::cout << "C solution from function avx256_row_matmul:" << std::endl;
+    // std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
+    // // matrix::print_matrix<float,m,k>(C_flt);
 
     /*-------------------------------------------------------*/
-    /*------------(int) std::array tests------------------*/
+    /*-------------(int) std::array tests--------------------*/
     /*-------------------------------------------------------*/
 
     // Matrix<int,m,n> A_int; 
@@ -182,10 +182,10 @@ int main() {
     // startTime = std::chrono::high_resolution_clock::now();
     // naive_row_matmul<int>(m,n,k,A_int,B_int,C_int);
     // endTime = std::chrono::high_resolution_clock::now();
-    // duration = endTime - startTime;
+    // duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
     // std::cout << "C matrix solution from function naive_row_matmul:" << std::endl;
-    // std::cout << "Time taken by function: " << duration.count() << std::endl;
+    // std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
     // matrix::print_matrix<int,m,k>(C_int);
 
     // matrix::fill_matrix<int,m,k>(0,C_int);
@@ -193,11 +193,45 @@ int main() {
     // startTime = std::chrono::high_resolution_clock::now();
     // avx256_row_matmul(m,n,k,A_int,B_int,C_int);
     // endTime = std::chrono::high_resolution_clock::now();
-    // duration = endTime - startTime;
+    // duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
 
     // std::cout << "C solution from function avx256_row_matmul:" << std::endl;
-    // std::cout << "Time taken by function: " << duration.count() << std::endl;
+    // std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
     // matrix::print_matrix<int,m,k>(C_int);
+
+    /*-------------------------------------------------------*/
+    /*-------------(int) std::array tests--------------------*/
+    /*-------------------------------------------------------*/
+
+    // std::unique_ptr<Matrix<double,m,n>> A_ptr = 
+    // std::make_unique<Matrix<double,m,n>>();
+    // matrix::fill_matrix<double,m,n>(1.0,*(A_ptr));
+    // // matrix::print_matrix<double,m,n>(*(A_ptr));
+    // // std::cout << std::endl;
+
+    // std::unique_ptr<Matrix<double,n,k>> B_ptr = 
+    // std::make_unique<Matrix<double,n,k>>();
+    // matrix::fill_matrix<double,n,k>(1.0,*(B_ptr));
+    // // matrix::print_matrix<double,n,k>(*(B_ptr));
+    // // std::cout << std::endl;
+
+    std::unique_ptr<Matrix<double,m,k>> C_ptr_tile = 
+    std::make_unique<Matrix<double,m,k>>();
+    matrix::fill_matrix<double,m,k>(0.0,*(C_ptr_tile));
+    // matrix::print_matrix<double,m,k>(*(C_ptr));
+    // std::cout << std::endl;
+
+    std::cout << "\nBeginning tile tests\n" << std::endl;
+    
+    startTime = std::chrono::high_resolution_clock::now();
+    naive_tile_matmul<double>(m,n,k,*A_ptr,*B_ptr,*C_ptr_tile);
+    endTime = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+    std::cout << "C matrix solution from function naive_tile_matmul:" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
+    // matrix::print_matrix<float,m,k>(C_tile);
+    // matrix::print_matrix<float,m,k>(C_flt);
 
     return 0;
 }

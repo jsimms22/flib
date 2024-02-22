@@ -11,6 +11,7 @@
 #include<ammintrin.h> //SSE4A
 #include<wmmintrin.h> //AES
 #include<immintrin.h> //AVX, AVX2, FMA
+#include<assert.h>
 
  /*C Matrix 4x4     A Matrix   B Matrix
  * | 00 10 20 30 |  | 0x -> |  | 0x 1x 2x 3x |
@@ -18,8 +19,9 @@
  * | 02 12 22 32 |  | 2x -> |  |             |
  * | 03 13 23 33 |  | 3x -> |  |             |
  */
+
 void do_4x4(int lda, int M, double* a, double* b, double* c) {
-    register __m256d a0x_3x,
+    __m256d a0x_3x,
         bx0, bx1, bx2, bx3,
         c00_30, c01_31,
         c02_32, c03_33;
@@ -54,8 +56,9 @@ void do_4x4(int lda, int M, double* a, double* b, double* c) {
     _mm256_storeu_pd(c03_33_ptr,c03_33);
 }
 
-void copy_a4 (int lda, const int M, std::array<double,16>& a_src, std::array<double,16>& a_dest) {
-    for (int i = 0; i < M; i+=lda) {
+template <std::size_t MN>
+void copy_a4x4 (int M, int N, std::array<double,MN>& a_src, std::array<double,16>& a_dest) {
+    for (int i = 0; i < M; i+=N) {
         a_dest[i] = a_src[i];
         a_dest[i+1] = a_src[i+1];
         a_dest[i+2] = a_src[i+2];
@@ -64,20 +67,45 @@ void copy_a4 (int lda, const int M, std::array<double,16>& a_src, std::array<dou
     }
 }
 
-void copy_b4 (int lda, const int K, std::array<double,16>& b_src, std::array<double,16>& b_dest) {
-    double *b_ptr0, *b_ptr1, *b_ptr2, *b_ptr3;
-    b_ptr0 = b_src;
-    b_ptr1 = b_ptr0 + lda;
-    b_ptr2 = b_ptr1 + lda;
-    b_ptr3 = b_ptr2 + lda;
-
+template <std::size_t NK>
+void copy_b4x4 (int N, int K, std::array<double,NK>& b_src, std::array<double,16>& b_dest) {
+    // double *b_ptr0, *b_ptr1, *b_ptr2, *b_ptr3;
+    // b_ptr0 = b_src;
+    // b_ptr1 = b_ptr0 + lda;
+    // b_ptr2 = b_ptr1 + lda;
+    // b_ptr3 = b_ptr2 + lda;
     for (int i = 0; i < K; ++i) {
-        b_dest++ = b_ptr0++;
-        b_dest++ = b_ptr1++;
-        b_dest++ = b_ptr2++;
-        b_dest++ = b_ptr3++;
+        b_dest[i] = b_src[0*K+i];//b_ptr0++;
+        b_dest[i+1] = b_src[1*K+i];//b_ptr1++;
+        b_dest[i+2] = b_src[2*K+i];//b_ptr2++;
+        b_dest[i+3] = b_src[3*K+i];//b_ptr3++;
     }
 }
+
+// template <std::size_t MN, std::size_t NK, std::size_t MK>
+// void blocked_column_dgemm(int M, int N, int K, std::array<double,MN>& A, std::array<double,NK>& B, std::array<double,MK>& C)
+// {
+//     double A_block[M*K], B_block[K*N];
+//     std::array<double,16> a_dst, b_dst, c_dst;
+
+//     // int Nmax = N-3;
+//     // int Mmax = M-3;
+//     // int fringe1 = M%4;
+//     // int fringe2 = N%4;
+
+//     int i = 0, j = 0, p = 0;
+
+//     for (i = 0 ; i < M; i += 4) {
+//         b_dst = &B_block[j*K];
+//         copy_b4(lda, K, B + j*lda, b_dst);
+//         for (j = 0; j < K; j += 4) {
+//             a_dst = &A_block[i*K];
+//             if (j == 0) { copy_a4(lda, K, A + i, a_dst); }
+//             c_dst = C + i + j*lda;
+//             do_4x4(lda, K, a_dst, b_dst, c_dst);
+//         }
+//     }
+// }
 
 // Double precision AVX256 row DGEMM
 template <std::size_t MN, std::size_t NK, std::size_t MK>
@@ -85,7 +113,7 @@ void avx256_row_matmul(int M, int N, int K, std::array<double,MN>& A, std::array
 {
     for (int i = 0; i < M; ++i) {
         for (int j = 0; j < K; j+=4) {
-            __m256d result = _mm256_setzero_pd();  
+            __m256d result = _mm256_setzero_pd();
             for (int k = 0; k < N; ++k) {
                 __m256d a = _mm256_broadcast_sd(&A[k+i*N]);
                 __m256d b = _mm256_loadu_pd(&B[j+k*K]);
@@ -168,25 +196,18 @@ void naive_row_matmul(int M, int N, int K, std::array<T,MN>& A, std::array<T,NK>
 // |1 1 1 1|    |2 2|      |3 3| 
 //              |2 2|       
 template <class T, std::size_t MN, std::size_t NK, std::size_t MK>
-void matmul(int ldmax, int m, int n, int k, std::array<T,MN>& A, std::array<T,NK>& B, std::array<T,MK>& C)
-{
-    int BLOCK1 = 8; int BLOCK2 = 16;
+void naive_tile_matmul(const int M, const int N, const int K, std::array<T,MN>& A, std::array<T,NK>& B, std::array<T,MK>& C) {
+    const std::size_t TileSize = 256;
+    //static_assert(M % TileSize == 0 && N % TileSize == 0 && K % TileSize == 0, "Tile size must divide matrix dimensions");
 
-    // row_naive_dgemm(ldmax,k,n,m,A,B,C);
-
-    for (int x = 0; x < ldmax; x += BLOCK2) {
-        int lim_i = x + std::min(BLOCK2,ldmax - x);
-        for (int y = 0; y < ldmax; y += BLOCK2) {
-            int lim_j = y + std::min(BLOCK2,ldmax - y);
-            for (int z = 0; z < ldmax; z += BLOCK2) {
-                int lim_k = z + std::min(BLOCK2,ldmax - z);
-                for (int i = x; i < lim_i; i += BLOCK1) {
-                    int M = std::min(BLOCK1,lim_i - i);
-                    for (int j = y; j < lim_j; j += BLOCK1) {
-                        int N = std::min(BLOCK1,lim_j - j);
-                        for (int k = z; k < lim_k; k += BLOCK1) {
-                            int K = std::min(BLOCK1,lim_k - k);
-                            //blocked_row_dgemm(ldmax,M,N,K,A[k + i*ldmax],B[j + k*ldmax],C[j + i*ldmax]);
+    for (std::size_t i = 0; i < M; i += TileSize) {
+        for (std::size_t j = 0; j < K; j += TileSize) {
+            for (std::size_t k = 0; k < N; k += TileSize) {
+                // Perform the multiplication on the current tiles
+                for (std::size_t ii = 0; ii < TileSize; ++ii) {
+                    for (std::size_t jj = 0; jj < TileSize; ++jj) {
+                        for (std::size_t kk = 0; kk < TileSize; ++kk) {
+                            C[(i + ii) * K + (j + jj)] += A[(i + ii) * N + (k + kk)] * B[(k + kk) * K + (j + jj)];
                         }
                     }
                 }

@@ -41,7 +41,7 @@ namespace matrix
     {
         for(std::size_t i = 0; i < matrix.size(); i++) {
             // matrix[i] = i; // debugging print_matrix bounds
-            matrix[i] = ALPHA * 1;// static_cast<T>(dis(gen)); 
+            matrix[i] = static_cast<T>(dis(gen)); 
         }
     }
 
