@@ -32,32 +32,29 @@
 
 ## SAMPLE OUTPUT
 
-Beginning <double> std::array tests
+Beginning heap std::array pointer tests
+
 
 C matrix solution from function naive_row_matmul:
 
-Time taken by function: 1977700
+Time taken by function: 5532 ms
 
 C solution from function avx256_row_matmul:
 
-Time taken by function: 828900
+Time taken by function: 2046 ms
 
-Beginning <double> heap std::array pointer tests
 
-C matrix solution from function naive_row_matmul:
+Beginning tile tests
 
-Time taken by function: 2324700
 
-C solution from function avx256_row_matmul:
+C matrix solution from function naive_tile_matmul:
 
-Time taken by function: 992200
+Time taken by function: 4336 ms
 
-Beginning <float> std::array tests
 
-C matrix solution from function naive_row_matmul:
+Beginning openBLAS dgemm reference benchmark
 
-Time taken by function: 2887500
 
-C solution from function avx256_row_matmul:
+C matrix solution from function cblas_dgemm:
 
-Time taken by function: 557000
+Time taken by function: 4 ms

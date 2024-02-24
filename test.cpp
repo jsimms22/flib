@@ -1,6 +1,7 @@
-// #include <lapack.h>
-// #include "lapack.h"
+// g++ test.cpp -lopenblas -lgfortran -mavx2
+
 #include "matmul.hpp"
+#include <openBLAS/cblas.h>
 #include<chrono>
 #include<memory>
 
@@ -200,7 +201,7 @@ int main() {
     // matrix::print_matrix<int,m,k>(C_int);
 
     /*-------------------------------------------------------*/
-    /*-------------(int) std::array tests--------------------*/
+    /*-----------------naive tile matmul---------------------*/
     /*-------------------------------------------------------*/
 
     // std::unique_ptr<Matrix<double,m,n>> A_ptr = 
@@ -233,5 +234,42 @@ int main() {
     // matrix::print_matrix<float,m,k>(C_tile);
     // matrix::print_matrix<float,m,k>(C_flt);
 
+    /*-------------------------------------------------------*/
+    /*-------------------cblas dgemm-----------------------*/
+    /*-------------------------------------------------------*/
+
+    std::cout << "\nBeginning openBLAS dgemm reference benchmark\n" << std::endl;
+
+    char TRANSA = 'N';
+    char TRANSB = 'N';
+    double ALPHA = 1.0;
+    double BETA = 0;
+    int LDA = m;
+    int LDB = n;
+    int LDC = k;
+
+    double* A = new double[m*n];
+    double* B = new double[n*k];
+    double* C = new double[m*k];
+
+    for (int i=0; i < (m*n); i++) { A[i] = i%3+1; }
+    for (int i=0; i < (n*k); i++) { B[i] = i%3+1; }
+    for (int i=0; i < (m*k); i++) { C[i] = 0; }
+
+    startTime = std::chrono::high_resolution_clock::now();
+    cblas_dgemm(CblasRowMajor,
+                CblasTrans,
+                CblasTrans, 
+                m, k, k, 
+                ALPHA, A, LDA, 
+                B, LDB, BETA, 
+                C, LDC);
+    endTime = std::chrono::high_resolution_clock::now();
+    duration = std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime);
+
+    std::cout << "C matrix solution from function cblas_dgemm:" << std::endl;
+    std::cout << "Time taken by function: " << duration.count() << " ms" << std::endl;
+
+    delete[](A,B,C);
     return 0;
 }
